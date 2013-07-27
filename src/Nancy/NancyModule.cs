@@ -228,9 +228,22 @@ namespace Nancy
             {
                 if (this.Context != null)
                 {
-                    this.Context.ModelValidationResult = value;                    
+                    this.Context.ModelValidationResult = value;
                 }
             }
+        }
+        /// <summary>
+        /// Add a route to the module at the specified path relative to the baseAddress for the module
+        /// </summary>
+        /// <param name="method">The method.</param>
+        /// <param name="relativePath">The relative path.</param>
+        /// <param name="condition">The condition.</param>
+        /// <param name="value">The value.</param>
+        public virtual void AddRoute(string method, string relativePath, Func<NancyContext, bool> condition, Func<dynamic, dynamic> value)
+        {
+            var fullPath = String.Concat(this.ModulePath, relativePath);
+
+            routes.Add(new Route(method, fullPath, condition, value));
         }
 
         /// <summary>
@@ -258,7 +271,7 @@ namespace Nancy
             /// <value>A delegate that is used to invoke the route.</value>
             public Func<dynamic, dynamic> this[string path]
             {
-                set { this.AddRoute(path, null, value); }
+                set { this.parentModule.AddRoute(method, path, null, value); }
             }
 
             /// <summary>
@@ -267,14 +280,7 @@ namespace Nancy
             /// <value>A delegate that is used to invoke the route.</value>
             public Func<dynamic, dynamic> this[string path, Func<NancyContext, bool> condition]
             {
-                set { this.AddRoute(path, condition, value); }
-            }
-
-            protected void AddRoute(string path, Func<NancyContext, bool> condition, Func<dynamic, dynamic> value)
-            {
-                var fullPath = String.Concat(this.parentModule.ModulePath, path);
-
-                this.parentModule.routes.Add(new Route(this.method, fullPath, condition, value));
+                set { this.parentModule.AddRoute(method, path, condition, value); }
             }
         }
 
